@@ -90,8 +90,8 @@ public class Device extends Base {
         return new Device(DatastoreManager.getInstance().getDatastore().put(entity));
     }
     
-    public void sendRandomToken(){
-        send(new RandomTokenData(getRandomToken()));
+    public void sendRandomToken(String zyncToken){
+        send(new RandomTokenData(getRandomToken(), zyncToken));
     }
     
     public void send(Object data){
@@ -110,16 +110,23 @@ public class Device extends Base {
     }
     
     private class RandomTokenData {
-        
+    
         private final String randomToken;
+        private final String zyncToken;
         
-        public RandomTokenData(String randomToken){
+        public RandomTokenData(String randomToken, String zyncToken){
             this.randomToken = randomToken;
+            this.zyncToken = zyncToken;
         }
-        
+    
         @JsonProperty("random_token")
         public String getRandomToken(){
             return randomToken;
+        }
+    
+        @JsonProperty("zync_token")
+        public String getZyncToken(){
+            return zyncToken;
         }
         
     }

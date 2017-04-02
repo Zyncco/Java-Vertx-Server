@@ -60,7 +60,7 @@ public class UserController {
     
             context.response().end(response.toString());
             
-            device.sendRandomToken();
+            device.sendRandomToken(user.getZyncToken());
         });
     }
     
