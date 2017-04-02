@@ -4,8 +4,6 @@ import co.zync.vertx.Utils;
 import co.zync.vertx.managers.DatastoreManager;
 import co.zync.vertx.managers.FCMManager;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.datastore.*;
 import de.bytefish.fcmjava.model.enums.ErrorCodeEnum;
 import de.bytefish.fcmjava.model.options.FcmMessageOptions;
@@ -100,13 +98,6 @@ public class Device extends Base {
         FcmMessageOptions messageOptions = FcmMessageOptions.builder().build();
     
         DataUnicastMessage message = new DataUnicastMessage(messageOptions, getInstanceId(), data);
-    
-        try{
-            String wat = new ObjectMapper().writeValueAsString(message);
-            System.out.println(wat);
-        }catch(JsonProcessingException e){
-            e.printStackTrace();
-        }
     
         FcmMessageResponse response = FCMManager.getInstance().getFcmClient().send(message);
         ErrorCodeEnum errorCode = response.getResults().get(0).getErrorCode();
