@@ -6,10 +6,10 @@
       "required": ["device_id", "firebase_token"],
       "type": "object",
       "properties": {
-        "device_id": {
+        "device-id": {
           "type": "string"
         },
-        "firebase_token": {
+        "firebase-token": {
           "type": "string"
         }
       }

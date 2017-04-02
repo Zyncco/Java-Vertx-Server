@@ -2,6 +2,7 @@ package co.zync.vertx.controllers;
 
 import co.zync.vertx.Response;
 import co.zync.vertx.Utils;
+import co.zync.vertx.messages.ClipDataMessage;
 import co.zync.vertx.models.Clipboard;
 import co.zync.vertx.models.User;
 import io.vertx.ext.web.RoutingContext;
@@ -160,13 +161,15 @@ public class ClipboardController {
                 return;
             }
         }
-        
-        clipboard.newClip(data.getString("payload-type"), payload, timestamp, hash, data.getJSONObject("encryption").toMap());
+    
+        Clipboard.Clip clip = clipboard.newClip(data.getString("payload-type"), payload, timestamp, hash, data.getJSONObject("encryption").toMap());
     
         JSONObject response = new JSONObject();
         response.put("success", true);
         
         context.response().end(response.toString());
+        
+        user.getDevices().send(new ClipDataMessage(clip));
     }
     
     public static void deleteClipboard(RoutingContext context){

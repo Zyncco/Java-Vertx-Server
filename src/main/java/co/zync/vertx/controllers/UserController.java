@@ -3,6 +3,7 @@ package co.zync.vertx.controllers;
 import co.zync.vertx.Response;
 import co.zync.vertx.Utils;
 import co.zync.vertx.managers.FirebaseManager;
+import co.zync.vertx.messages.RandomTokenDataMessage;
 import co.zync.vertx.models.Device;
 import co.zync.vertx.models.User;
 import com.google.firebase.auth.FirebaseToken;
@@ -60,7 +61,7 @@ public class UserController {
     
             context.response().end(response.toString());
             
-            device.sendRandomToken(user.getZyncToken());
+            device.send(new RandomTokenDataMessage(device.getRandomToken(), user.getZyncToken()));
         });
     }
     

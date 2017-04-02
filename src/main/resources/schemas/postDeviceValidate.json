@@ -6,10 +6,10 @@
       "required": ["device_id", "random_token"],
       "type": "object",
       "properties": {
-        "device_id": {
+        "device-id": {
           "type": "string"
         },
-        "random_token": {
+        "random-token": {
           "type": "string"
         }
       }

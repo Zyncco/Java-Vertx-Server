@@ -97,7 +97,7 @@ public class Clipboard extends Base {
         return false;
     }
     
-    public void newClip(String payloadType, String payload, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
+    public Clip newClip(String payloadType, String payload, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
         if(clips.size() + 1 > 10){
             Clip oldestClip = clips.get(clips.keySet().stream().sorted().findFirst().get());
             oldestClip.deleteFromStorage();
@@ -127,6 +127,8 @@ public class Clipboard extends Base {
         save(newEntity);
         
         this.clips.get(timestamp).writeToStorage(payload);
+        
+        return this.clips.get(timestamp);
     }
     
     public class Clip implements Comparable<Clip> {

@@ -93,4 +93,8 @@ public class User extends Base {
         return Device.findByInstanceId(instanceId);
     }
     
+    public Device.DeviceGroup getDevices(){
+        return Device.findByUser(getEntity().getKey());
+    }
+    
 }

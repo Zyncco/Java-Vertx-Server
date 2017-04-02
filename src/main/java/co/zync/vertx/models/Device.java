@@ -3,15 +3,16 @@ package co.zync.vertx.models;
 import co.zync.vertx.Utils;
 import co.zync.vertx.managers.DatastoreManager;
 import co.zync.vertx.managers.FCMManager;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.cloud.datastore.*;
 import de.bytefish.fcmjava.model.enums.ErrorCodeEnum;
 import de.bytefish.fcmjava.model.options.FcmMessageOptions;
+import de.bytefish.fcmjava.requests.data.DataMulticastMessage;
 import de.bytefish.fcmjava.requests.data.DataUnicastMessage;
 import de.bytefish.fcmjava.responses.FcmMessageResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Device extends Base {
     
@@ -23,7 +24,7 @@ public class Device extends Base {
     protected void initialize(){
     }
     
-    public static List<Device> findByUser(Key userKey){
+    public static DeviceGroup findByUser(Key userKey){
         Query<Entity> query = Query.newEntityQueryBuilder().setKind("device_java").setFilter(StructuredQuery.PropertyFilter.eq("user", userKey)).build();
         QueryResults<Entity> result = DatastoreManager.getInstance().getDatastore().run(query);
         
@@ -33,7 +34,7 @@ public class Device extends Base {
             devices.add(new Device(result.next()));
         }
         
-        return devices;
+        return new DeviceGroup(devices);
     }
     
     public static Device findByInstanceId(String instanceId){
@@ -90,10 +91,6 @@ public class Device extends Base {
         return new Device(DatastoreManager.getInstance().getDatastore().put(entity));
     }
     
-    public void sendRandomToken(String zyncToken){
-        send(new RandomTokenData(getRandomToken(), zyncToken));
-    }
-    
     public void send(Object data){
         FcmMessageOptions messageOptions = FcmMessageOptions.builder().build();
     
@@ -109,24 +106,38 @@ public class Device extends Base {
         }
     }
     
-    private class RandomTokenData {
-    
-        private final String randomToken;
-        private final String zyncToken;
+    public static class DeviceGroup {
         
-        public RandomTokenData(String randomToken, String zyncToken){
-            this.randomToken = randomToken;
-            this.zyncToken = zyncToken;
+        private final List<Device> devices;
+    
+        private DeviceGroup(List<Device> devices){
+            this.devices = devices;
         }
     
-        @JsonProperty("random_token")
-        public String getRandomToken(){
-            return randomToken;
-        }
+        public void send(Object data){
+            FcmMessageOptions messageOptions = FcmMessageOptions.builder().build();
     
-        @JsonProperty("zync_token")
-        public String getZyncToken(){
-            return zyncToken;
+            List<Device> validatedDevices = devices.stream().filter(Device::isValidated).collect(Collectors.toList());
+            
+            if(validatedDevices.size() == 0){
+                return;
+            }
+            
+            List<String> instanceIds = validatedDevices.stream().map(Device::getInstanceId).collect(Collectors.toList());
+            
+            DataMulticastMessage message = new DataMulticastMessage(messageOptions, instanceIds, data);
+        
+            FcmMessageResponse response = FCMManager.getInstance().getFcmClient().send(message);
+    
+            for(int i = 0; i < response.getResults().size(); i++){
+                ErrorCodeEnum errorCode = response.getResults().get(i).getErrorCode();
+    
+                if(errorCode == ErrorCodeEnum.InvalidRegistration
+                        || errorCode == ErrorCodeEnum.MissingRegistration
+                        || errorCode == ErrorCodeEnum.NotRegistered){
+                    validatedDevices.get(i).delete();
+                }
+            }
         }
         
     }
