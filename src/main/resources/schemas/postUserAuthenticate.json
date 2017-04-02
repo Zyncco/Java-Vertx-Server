@@ -1,0 +1,18 @@
+{
+  "required": ["data"],
+  "type": "object",
+  "properties": {
+    "data": {
+      "required": ["device_id", "firebase_token"],
+      "type": "object",
+      "properties": {
+        "device_id": {
+          "type": "string"
+        },
+        "firebase_token": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

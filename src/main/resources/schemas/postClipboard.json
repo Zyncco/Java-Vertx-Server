@@ -1,0 +1,45 @@
+{
+  "required": ["data"],
+  "type": "object",
+  "properties": {
+    "data": {
+      "required": ["timestamp", "hash", "encryption", "payload-type", "payload"],
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "number"
+        },
+        "hash": {
+          "required": ["crc32"],
+          "type": "object",
+          "properties": {
+            "crc32": {
+              "type": "string"
+            }
+          }
+        },
+        "encryption": {
+          "required": ["type", "iv", "salt"],
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "iv": {
+              "type": "string"
+            },
+            "salt": {
+              "type": "string"
+            }
+          }
+        },
+        "payload-type": {
+          "type": "string"
+        },
+        "payload": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

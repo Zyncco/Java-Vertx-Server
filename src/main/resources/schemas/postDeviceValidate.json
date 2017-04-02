@@ -1,0 +1,18 @@
+{
+  "required": ["data"],
+  "type": "object",
+  "properties": {
+    "data": {
+      "required": ["device_id", "random_token"],
+      "type": "object",
+      "properties": {
+        "device_id": {
+          "type": "string"
+        },
+        "random_token": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
