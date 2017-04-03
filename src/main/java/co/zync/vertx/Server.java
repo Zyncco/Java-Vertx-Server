@@ -74,7 +74,7 @@ public class Server {
         
         router.route("/*").handler(BodyHandler.create());
         router.route("/*").handler(ResponseContentTypeHandler.create());
-        
+        router.route("/*").handler(context -> context.response().putHeader("Access-Control-Allow-Origin", "*"));
         
         router.mountSubRouter("/v0", v0Router);
         
