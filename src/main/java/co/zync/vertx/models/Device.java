@@ -100,6 +100,7 @@ public class Device extends Base {
             String mappedMessage = new ObjectMapper().writeValueAsString(message);
             HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                     .header("Content-Type", "application/json")
+                    .header("Content-length", String.valueOf(mappedMessage.length()))
                     .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
                     .body(mappedMessage)
                     .asString();
@@ -141,6 +142,7 @@ public class Device extends Base {
                 String mappedMessage = new ObjectMapper().writeValueAsString(message);
                 HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                         .header("Content-Type", "application/json")
+                        .header("Content-length", String.valueOf(mappedMessage.length()))
                         .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
                         .body(mappedMessage)
                         .asString();
