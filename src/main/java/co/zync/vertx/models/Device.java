@@ -1,16 +1,12 @@
 package co.zync.vertx.models;
 
 import co.zync.vertx.Utils;
-import co.zync.vertx.managers.CredentialsManager;
 import co.zync.vertx.managers.DatastoreManager;
 import co.zync.vertx.messages.BaseMulticastMessage;
 import co.zync.vertx.messages.BaseUnicastMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.datastore.*;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,28 +90,21 @@ public class Device extends Base {
     }
     
     public void send(Object data){
-        BaseUnicastMessage message = new BaseUnicastMessage(data, getInstanceId());
-    
-        try{
-            String mappedMessage = new ObjectMapper().writeValueAsString(message);
-            HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                    .body(mappedMessage)
-                    .asString();
-    
-            System.out.println(response.getBody());
-        }catch(UnirestException | JsonProcessingException e){
-            e.printStackTrace();
+        JSONObject response = Utils.sendFirebaseMessage(new BaseUnicastMessage(data, getInstanceId()));
+        
+        if(response == null){
+            // TODO Custom Error
+            throw new NullPointerException();
         }
         
-        /*
-        if(errorCode == ErrorCodeEnum.InvalidRegistration
-                || errorCode == ErrorCodeEnum.MissingRegistration
-                || errorCode == ErrorCodeEnum.NotRegistered){
-            delete();
+        if(response.getInt("failure") > 0){
+            String error = response.getJSONArray("results").getJSONObject(0).getString("error");
+            if(error.equalsIgnoreCase("NotRegistered")
+                    || error.equalsIgnoreCase("InvalidRegistration")
+                    || error.equalsIgnoreCase("MissingRegistration")){
+                delete();
+            }
         }
-        */
     }
     
     public static class DeviceGroup {
@@ -135,32 +124,24 @@ public class Device extends Base {
             
             List<String> instanceIds = validatedDevices.stream().map(Device::getInstanceId).collect(Collectors.toList());
     
-            BaseMulticastMessage message = new BaseMulticastMessage(data, instanceIds);
+            JSONObject response = Utils.sendFirebaseMessage(new BaseMulticastMessage(data, instanceIds));
     
-            try{
-                String mappedMessage = new ObjectMapper().writeValueAsString(message);
-                HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
-                        .header("Content-Type", "application/json")
-                        .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                        .body(mappedMessage)
-                        .asString();
-    
-                System.out.println(response.getBody());
-            }catch(UnirestException | JsonProcessingException e){
-                e.printStackTrace();
+            if(response == null){
+                // TODO Custom Error
+                throw new NullPointerException();
             }
-            
-            /*
-            for(int i = 0; i < response.getResults().size(); i++){
-                ErrorCodeEnum errorCode = response.getResults().get(i).getErrorCode();
     
-                if(errorCode == ErrorCodeEnum.InvalidRegistration
-                        || errorCode == ErrorCodeEnum.MissingRegistration
-                        || errorCode == ErrorCodeEnum.NotRegistered){
-                    validatedDevices.get(i).delete();
+            if(response.getInt("failure") > 0){
+                JSONArray results = response.getJSONArray("results");
+                for(int i = 0; i < results.length(); i++){
+                    String error = results.getJSONObject(i).getString("error");
+                    if(error.equalsIgnoreCase("NotRegistered")
+                            || error.equalsIgnoreCase("InvalidRegistration")
+                            || error.equalsIgnoreCase("MissingRegistration")){
+                        validatedDevices.get(i).delete();
+                    }
                 }
             }
-            */
         }
         
     }

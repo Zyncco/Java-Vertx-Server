@@ -44,6 +44,29 @@ public class ClipboardController {
         context.response().end(response.toString());
     }
     
+    public static void getClipboardRaw(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+        
+        Clipboard clipboard = user.getClipboard();
+        if(clipboard.getClips().size() == 0){
+            Response.CLIPBOARD_EMPTY.replyTo(context);
+            return;
+        }
+        
+        Clipboard.Clip clip = clipboard.getClips().get(clipboard.getLatest());
+        
+        if(clip == null){
+            Response.CLIPBOARD_NOT_FOUND.replyTo(context);
+            return;
+        }
+        
+        context.response().end(clip.getPayload());
+    }
+    
     public static void getClipboardTimestamp(RoutingContext context){
         User user = User.fromRequestContext(context);
         if(user == null){
@@ -102,6 +125,39 @@ public class ClipboardController {
             }catch(Exception ignored){
                 Response.CLIPBOARDS_NOT_FOUND.replyTo(context);
             }
+        }
+    }
+    
+    public static void getClipboardTimestampRaw(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+        
+        Clipboard clipboard = user.getClipboard();
+        if(clipboard.getClips().size() == 0){
+            Response.CLIPBOARD_EMPTY.replyTo(context);
+            return;
+        }
+        
+        String[] timestamps = context.request().getParam("timestamp").split(",");
+        
+        if(timestamps.length == 1){
+            try{
+                Clipboard.Clip clip = clipboard.getClips().get(Long.valueOf(timestamps[0]));
+                
+                if(clip == null){
+                    Response.CLIPBOARD_NOT_FOUND.replyTo(context);
+                    return;
+                }
+                
+                context.response().end(clip.getPayload());
+            }catch(Exception ignored){
+                Response.CLIPBOARD_NOT_FOUND.replyTo(context);
+            }
+        }else{
+            Response.CANNOT_RETRIEVE_MULTIPLE_RAW.replyTo(context);
         }
     }
     
