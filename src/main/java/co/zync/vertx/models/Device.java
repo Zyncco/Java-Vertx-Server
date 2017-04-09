@@ -1,14 +1,13 @@
 package co.zync.vertx.models;
 
 import co.zync.vertx.Utils;
+import co.zync.vertx.managers.CredentialsManager;
 import co.zync.vertx.managers.DatastoreManager;
-import co.zync.vertx.managers.FCMManager;
+import co.zync.vertx.messages.BaseMulticastMessage;
+import co.zync.vertx.messages.BaseUnicastMessage;
 import com.google.cloud.datastore.*;
-import de.bytefish.fcmjava.model.enums.ErrorCodeEnum;
-import de.bytefish.fcmjava.model.options.FcmMessageOptions;
-import de.bytefish.fcmjava.requests.data.DataMulticastMessage;
-import de.bytefish.fcmjava.requests.data.DataUnicastMessage;
-import de.bytefish.fcmjava.responses.FcmMessageResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,18 +91,25 @@ public class Device extends Base {
     }
     
     public void send(Object data){
-        FcmMessageOptions messageOptions = FcmMessageOptions.builder().build();
+        BaseUnicastMessage message = new BaseUnicastMessage(data, getInstanceId());
     
-        DataUnicastMessage message = new DataUnicastMessage(messageOptions, getInstanceId(), data);
-    
-        FcmMessageResponse response = FCMManager.getInstance().getFcmClient().send(message);
-        ErrorCodeEnum errorCode = response.getResults().get(0).getErrorCode();
+        try{
+            Unirest.post("https://fcm.googleapis.com/fcm/send")
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
+                    .body(message)
+                    .asJson();
+        }catch(UnirestException e){
+            e.printStackTrace();
+        }
         
+        /*
         if(errorCode == ErrorCodeEnum.InvalidRegistration
                 || errorCode == ErrorCodeEnum.MissingRegistration
                 || errorCode == ErrorCodeEnum.NotRegistered){
             delete();
         }
+        */
     }
     
     public static class DeviceGroup {
@@ -115,8 +121,6 @@ public class Device extends Base {
         }
     
         public void send(Object data){
-            FcmMessageOptions messageOptions = FcmMessageOptions.builder().build();
-    
             List<Device> validatedDevices = devices.stream().filter(Device::isValidated).collect(Collectors.toList());
             
             if(validatedDevices.size() == 0){
@@ -124,11 +128,20 @@ public class Device extends Base {
             }
             
             List<String> instanceIds = validatedDevices.stream().map(Device::getInstanceId).collect(Collectors.toList());
-            
-            DataMulticastMessage message = new DataMulticastMessage(messageOptions, instanceIds, data);
-        
-            FcmMessageResponse response = FCMManager.getInstance().getFcmClient().send(message);
     
+            BaseMulticastMessage message = new BaseMulticastMessage(data, instanceIds);
+    
+            try{
+                Unirest.post("https://fcm.googleapis.com/fcm/send")
+                        .header("Content-Type", "application/json")
+                        .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
+                        .body(message)
+                        .asJson();
+            }catch(UnirestException e){
+                e.printStackTrace();
+            }
+            
+            /*
             for(int i = 0; i < response.getResults().size(); i++){
                 ErrorCodeEnum errorCode = response.getResults().get(i).getErrorCode();
     
@@ -138,6 +151,7 @@ public class Device extends Base {
                     validatedDevices.get(i).delete();
                 }
             }
+            */
         }
         
     }
