@@ -19,7 +19,7 @@ public class BaseMulticastMessage {
         return data;
     }
     
-    @JsonProperty("to")
+    @JsonProperty("registration_ids")
     public List<String> getTo(){
         return to;
     }
