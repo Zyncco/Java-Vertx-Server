@@ -30,8 +30,8 @@ public class DeviceController {
         }
         
         JSONObject data = body.getJSONObject("data");
-        String deviceId = data.getString("device_id");
-        String randomToken = data.getString("random_token");
+        String deviceId = data.getString("device-id");
+        String randomToken = data.getString("random-token");
         
         Device device = user.getDevice(deviceId);
         

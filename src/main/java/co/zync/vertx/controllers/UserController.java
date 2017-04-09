@@ -29,8 +29,8 @@ public class UserController {
     
         JSONObject data = body.getJSONObject("data");
         
-        String firebaseToken = data.getString("firebase_token");
-        String deviceInstanceId = data.getString("device_id");
+        String firebaseToken = data.getString("firebase-token");
+        String deviceInstanceId = data.getString("device-id");
     
         Task<FirebaseToken> task = FirebaseManager.getInstance().getFirebaseAuth().verifyIdToken(firebaseToken);
     
@@ -53,7 +53,7 @@ public class UserController {
             Device device = user.addDevice(deviceInstanceId);
     
             JSONObject responseData = new JSONObject();
-            responseData.put("first_device", first);
+            responseData.put("first-device", first);
     
             JSONObject response = new JSONObject();
             response.put("success", true);

@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "data": {
-      "required": ["device_id", "firebase_token"],
+      "required": ["device-id", "firebase-token"],
       "type": "object",
       "properties": {
         "device-id": {
