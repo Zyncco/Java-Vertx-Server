@@ -25,7 +25,7 @@ public class CredentialsManager {
         try{
             this.googleCredentials = GoogleCredentials.fromStream(new FileInputStream("credentials/appengine-credentials.json"));
             this.firebaseCredentials = FirebaseCredentials.fromCertificate(new FileInputStream("credentials/firebase-credentials.json"));
-            this.firebaseCloudMessagingKey = new String(Files.readAllBytes(Paths.get("credentials/firebase-cloud-messaging-key.txt")));
+            this.firebaseCloudMessagingKey = new String(Files.readAllBytes(Paths.get("credentials/firebase-cloud-messaging-key.txt"))).trim();
         }catch(IOException e){
             throw new RuntimeException(e);
         }
