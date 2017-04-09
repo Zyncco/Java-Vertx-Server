@@ -8,6 +8,7 @@ import co.zync.vertx.messages.BaseUnicastMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.datastore.*;
+import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
@@ -96,11 +97,13 @@ public class Device extends Base {
         BaseUnicastMessage message = new BaseUnicastMessage(data, getInstanceId());
     
         try{
-            Unirest.post("https://fcm.googleapis.com/fcm/send")
+            HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                     .header("Content-Type", "application/json")
                     .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
                     .body(new ObjectMapper().writeValueAsString(message))
-                    .asJson();
+                    .asString();
+    
+            System.out.println(response.getBody());
         }catch(UnirestException | JsonProcessingException e){
             e.printStackTrace();
         }
@@ -134,11 +137,13 @@ public class Device extends Base {
             BaseMulticastMessage message = new BaseMulticastMessage(data, instanceIds);
     
             try{
-                Unirest.post("https://fcm.googleapis.com/fcm/send")
+                HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                         .header("Content-Type", "application/json")
                         .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
                         .body(new ObjectMapper().writeValueAsString(message))
-                        .asJson();
+                        .asString();
+    
+                System.out.println(response.getBody());
             }catch(UnirestException | JsonProcessingException e){
                 e.printStackTrace();
             }
