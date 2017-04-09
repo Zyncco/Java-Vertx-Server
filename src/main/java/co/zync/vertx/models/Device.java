@@ -5,6 +5,8 @@ import co.zync.vertx.managers.CredentialsManager;
 import co.zync.vertx.managers.DatastoreManager;
 import co.zync.vertx.messages.BaseMulticastMessage;
 import co.zync.vertx.messages.BaseUnicastMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.datastore.*;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -97,9 +99,9 @@ public class Device extends Base {
             Unirest.post("https://fcm.googleapis.com/fcm/send")
                     .header("Content-Type", "application/json")
                     .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                    .body(message)
+                    .body(new ObjectMapper().writeValueAsString(message))
                     .asJson();
-        }catch(UnirestException e){
+        }catch(UnirestException | JsonProcessingException e){
             e.printStackTrace();
         }
         
@@ -135,9 +137,9 @@ public class Device extends Base {
                 Unirest.post("https://fcm.googleapis.com/fcm/send")
                         .header("Content-Type", "application/json")
                         .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                        .body(message)
+                        .body(new ObjectMapper().writeValueAsString(message))
                         .asJson();
-            }catch(UnirestException e){
+            }catch(UnirestException | JsonProcessingException e){
                 e.printStackTrace();
             }
             
