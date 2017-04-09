@@ -97,10 +97,12 @@ public class Device extends Base {
         BaseUnicastMessage message = new BaseUnicastMessage(data, getInstanceId());
     
         try{
+            String mappedMessage = new ObjectMapper().writeValueAsString(message);
             HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                     .header("Content-Type", "application/json")
+                    .header("Content-Length", String.valueOf(mappedMessage.length()))
                     .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                    .body(new ObjectMapper().writeValueAsString(message))
+                    .body(mappedMessage)
                     .asString();
     
             System.out.println(response.getBody());
@@ -137,10 +139,12 @@ public class Device extends Base {
             BaseMulticastMessage message = new BaseMulticastMessage(data, instanceIds);
     
             try{
+                String mappedMessage = new ObjectMapper().writeValueAsString(message);
                 HttpResponse<String> response = Unirest.post("https://fcm.googleapis.com/fcm/send")
                         .header("Content-Type", "application/json")
+                        .header("Content-Length", String.valueOf(mappedMessage.length()))
                         .header("Authorization", "key=" + CredentialsManager.getInstance().getFirebaseCloudMessagingKey())
-                        .body(new ObjectMapper().writeValueAsString(message))
+                        .body(mappedMessage)
                         .asString();
     
                 System.out.println(response.getBody());
