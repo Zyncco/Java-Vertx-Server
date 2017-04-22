@@ -201,7 +201,11 @@ public class Clipboard extends Base {
             data.put("encryption", getEncryption());
             
             if(payload){
-                data.put("payload", new String(StorageManager.getInstance().getBucket().get(getHexPath()).getContent()));
+                try{
+                    data.put("payload", new String(StorageManager.getInstance().getBucket().get(getHexPath()).getContent()));
+                }catch(Exception ignored){
+                    data.put("payload", "null");
+                }
             }
             
             return data;

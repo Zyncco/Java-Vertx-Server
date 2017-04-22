@@ -122,8 +122,8 @@ public class ClipboardController {
                 response.put("data", data);
                 
                 context.response().end(response.toString());
-            }catch(Exception ignored){
-                Response.CLIPBOARDS_NOT_FOUND.replyTo(context);
+            }catch(Exception e){
+                Response.EXCEPTION_THROWN.replyToWithMessage(context, e.getMessage());
             }
         }
     }
