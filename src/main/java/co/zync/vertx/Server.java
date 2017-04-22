@@ -97,9 +97,9 @@ public class Server {
         router.delete("/clipboard/").handler(ClipboardController::deleteClipboard);
         router.get("/clipboard/history/").handler(ClipboardController::getClipboardHistory);
         router.get("/clipboard/raw/").produces("text/plain").handler(ClipboardController::getClipboardRaw);
-        
-        router.get("/clipboard/:timestamp/").handler(ClipboardController::getClipboardTimestamp);
+    
         router.get("/clipboard/:timestamp/raw").produces("text/plain").handler(ClipboardController::getClipboardTimestampRaw);
+        router.get("/clipboard/:timestamp").handler(ClipboardController::getClipboardTimestamp);
         
         router.post("/user/authenticate/").handler(UserController::postAuthenticate);
         
