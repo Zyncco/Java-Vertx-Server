@@ -281,20 +281,6 @@ public class ClipboardController {
         JSONObject data = body.getJSONObject("data");
     
         long timestamp = data.getLong("timestamp");
-        String payload = data.getString("payload");
-    
-        if(payload.length() > 10000000){
-            if(timestamp < System.currentTimeMillis() - CLIP_EXPIRY_BIG){
-                Response.CLIPBOARD_LATE.replyTo(context);
-                return;
-            }
-        }else{
-            if(timestamp < System.currentTimeMillis() - CLIP_EXPIRY_SMALL){
-                Response.CLIPBOARD_LATE.replyTo(context);
-                return;
-            }
-        }
-    
         if(timestamp > System.currentTimeMillis() + CLIP_FUTURE) {
             Response.CLIPBOARD_TIME_TRAVEL.replyTo(context);
             return;
