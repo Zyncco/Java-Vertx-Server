@@ -8,6 +8,7 @@ import co.zync.vertx.managers.DatastoreManager;
 import co.zync.vertx.managers.FirebaseManager;
 import co.zync.vertx.managers.StorageManager;
 import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.LoggerHandler;
@@ -32,14 +33,14 @@ public class Server {
         
         System.out.print("Initializing Firebase...");
         System.out.println(" initialized: " + FirebaseManager.getInstance().getFirebaseApp().getOptions().getDatabaseUrl());
+    
+        VertxOptions options = new VertxOptions();
+        options.setMaxEventLoopExecuteTime(Long.MAX_VALUE);
         
-        Vertx vertx = Vertx.vertx();
+        Vertx vertx = Vertx.vertx(options);
         
         Router v0Router = Router.router(vertx);
         createV0Routes(v0Router);
-        
-        BodyHandler bodyHandler = BodyHandler.create();
-        ResponseContentTypeHandler responseContentTypeHandler = ResponseContentTypeHandler.create();
         
         Router router = Router.router(vertx);
         
@@ -71,12 +72,20 @@ public class Server {
                     
                     Response.EXCEPTION_THROWN.replyToWithMessage(context, message);
                 });
-        
-        router.route("/*").handler(BodyHandler.create());
+    
         router.route("/*").handler(ResponseContentTypeHandler.create());
         router.route("/*").handler(context -> {
             context.response().putHeader("Access-Control-Allow-Origin", "*");
             context.next();
+        });
+    
+        BodyHandler bodyHandler = BodyHandler.create();
+        router.route("/*").handler(context -> {
+            if(context.request().uri().matches("/v./clipboard/upload/.+")){
+                context.next();
+            }else{
+                bodyHandler.handle(context);
+            }
         });
         
         router.mountSubRouter("/v0", v0Router);
@@ -97,6 +106,9 @@ public class Server {
         router.delete("/clipboard/").handler(ClipboardController::deleteClipboard);
         router.get("/clipboard/history/").handler(ClipboardController::getClipboardHistory);
         router.get("/clipboard/raw/").produces("text/plain").handler(ClipboardController::getClipboardRaw);
+    
+        router.post("/clipboard/upload/").handler(ClipboardController::postClipboardUploadURL);
+        router.post("/clipboard/upload/:token").handler(ClipboardController::postClipboardUploadURLToken);
     
         router.get("/clipboard/:timestamp/raw").produces("text/plain").handler(ClipboardController::getClipboardTimestampRaw);
         router.get("/clipboard/:timestamp").handler(ClipboardController::getClipboardTimestamp);

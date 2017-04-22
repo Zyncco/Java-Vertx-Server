@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import org.json.JSONObject;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,16 @@ public class Clipboard extends Base {
                 .build();
     
         return new Clipboard(DatastoreManager.getInstance().getDatastore().put(entity));
+    }
+    
+    public static Clipboard findByID(Key key){
+        Entity result = DatastoreManager.getInstance().getDatastore().get(key);
+    
+        if(result == null){
+            return null;
+        }
+    
+        return new Clipboard(result);
     }
     
     public long getClipCount(){
@@ -97,36 +108,53 @@ public class Clipboard extends Base {
         return false;
     }
     
+    public Clip newClip(FullEntity<IncompleteKey> entity){
+        if(clips.size() + 1 > 10){
+            Clip oldestClip = clips.get(clips.keySet().stream().sorted().findFirst().get());
+            oldestClip.deleteFromStorage();
+            this.entity.getList("clips").remove(oldestClip.entity);
+        }
+        
+        ListValue clips = ListValue.of(this.entity.getList("clips")).toBuilder().addValue(entity).build();
+        
+        edit().set("clips", clips).set("latest", entity.getLong("timestamp")).set("clip_count", getClipCount() + 1);
+    
+        save();
+        
+        return this.clips.get(entity.getLong("timestamp"));
+    }
+    
     public Clip newClip(String payloadType, String payload, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
+        Clip clip = newClip(payloadType, timestamp, hash, encryption);
+        clip.writeToStorage(payload);
+        return clip;
+    }
+    
+    public Clip newClip(String payloadType, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
         if(clips.size() + 1 > 10){
             Clip oldestClip = clips.get(clips.keySet().stream().sorted().findFirst().get());
             oldestClip.deleteFromStorage();
             entity.getList("clips").remove(oldestClip.entity);
         }
-    
+        
         FullEntity.Builder<IncompleteKey> hashEntity = FullEntity.newBuilder();
         hash.forEach((key, value) -> hashEntity.set(key, (String) value));
         
         FullEntity.Builder<IncompleteKey> encryptionEntity = FullEntity.newBuilder();
         encryption.forEach((key, value) -> encryptionEntity.set(key, (String) value));
-    
+        
         FullEntity<IncompleteKey> clipEntity = FullEntity.newBuilder()
                 .set("payload-type", payloadType)
                 .set("timestamp", timestamp)
                 .set("hash", hashEntity.build())
                 .set("encryption", encryptionEntity.build())
                 .build();
-    
+        
         ListValue clips = ListValue.of(entity.getList("clips")).toBuilder().addValue(clipEntity).build();
-        Entity newEntity = Entity.newBuilder(entity)
-                .set("clips", clips)
-                .set("latest", timestamp)
-                .set("clip_count", getClipCount() + 1)
-                .build();
+    
+        edit().set("clips", clips).set("latest", timestamp).set("clip_count", getClipCount() + 1);
         
-        save(newEntity);
-        
-        this.clips.get(timestamp).writeToStorage(payload);
+        save();
         
         return this.clips.get(timestamp);
     }
@@ -210,9 +238,13 @@ public class Clipboard extends Base {
             
             return data;
         }
-        
+    
         public void writeToStorage(String payload){
             StorageManager.getInstance().getBucket().create(getHexPath(), payload.getBytes());
+        }
+    
+        public void writeToStorage(InputStream stream){
+            StorageManager.getInstance().getBucket().create(getHexPath(), stream);
         }
     
         public void deleteFromStorage(){

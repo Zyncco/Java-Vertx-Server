@@ -33,7 +33,8 @@ public enum Response {
     CLIPBOARD_TIME_TRAVEL(false, 400, 304, "Clipboard is time traveling"),
     CLIPBOARD_NOT_FOUND(false, 404, 305, "Clipboard not found"),
     CLIPBOARDS_NOT_FOUND(false, 404, 306, "One or more of requested clipboards not found"),
-    CANNOT_RETRIEVE_MULTIPLE_RAW(false, 400, 307, "Cannot retrieve multiple raw clipboards");
+    CANNOT_RETRIEVE_MULTIPLE_RAW(false, 400, 307, "Invalid upload token"),
+    INVALID_UPLOAD_TOKEN(false, 400, 308, "Cannot retrieve multiple raw clipboards");
     
     private boolean success;
     private final int status;

@@ -4,12 +4,18 @@ import co.zync.vertx.Response;
 import co.zync.vertx.Utils;
 import co.zync.vertx.messages.ClipDataMessage;
 import co.zync.vertx.models.Clipboard;
+import co.zync.vertx.models.UploadURL;
 import co.zync.vertx.models.User;
 import io.vertx.ext.web.RoutingContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClipboardController {
     
@@ -256,6 +262,130 @@ public class ClipboardController {
         response.put("data", data);
         
         context.response().end(response.toString());
+    }
+    
+    public static void postClipboardUploadURL(RoutingContext context){
+        JSONObject body;
+        try{
+            body = new JSONObject(context.getBodyAsString());
+        }catch(Exception ignored){
+            Response.REQUEST_DATA_INVALID.replyTo(context);
+            return;
+        }
+    
+        if(!Utils.validateJson(body, "postClipboardWithoutPayload")){
+            Response.REQUEST_DATA_INVALID.replyTo(context);
+            return;
+        }
+    
+        JSONObject data = body.getJSONObject("data");
+    
+        long timestamp = data.getLong("timestamp");
+        String payload = data.getString("payload");
+    
+        if(payload.length() > 10000000){
+            if(timestamp < System.currentTimeMillis() - CLIP_EXPIRY_BIG){
+                Response.CLIPBOARD_LATE.replyTo(context);
+                return;
+            }
+        }else{
+            if(timestamp < System.currentTimeMillis() - CLIP_EXPIRY_SMALL){
+                Response.CLIPBOARD_LATE.replyTo(context);
+                return;
+            }
+        }
+    
+        if(timestamp > System.currentTimeMillis() + CLIP_FUTURE) {
+            Response.CLIPBOARD_TIME_TRAVEL.replyTo(context);
+            return;
+        }
+        
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+    
+        Clipboard clipboard = user.getClipboard();
+    
+        Map<String, Object> hash = data.getJSONObject("hash").toMap();
+        if(clipboard.getClips().size() > 0){
+            if(timestamp < clipboard.getLatest()){
+                Response.CLIPBOARD_OUTDATED.replyTo(context);
+                return;
+            }
+        
+            if(clipboard.clipExists(hash)){
+                Response.CLIPBOARD_IDENTICAL.replyTo(context);
+                return;
+            }
+        }
+    
+        String token = Utils.secureRandom(32);
+    
+        UploadURL.create(token, data.getString("payload-type"), timestamp, hash, data.getJSONObject("encryption").toMap());
+    
+        data = new JSONObject();
+        data.put("token", token);
+    
+        JSONObject response = new JSONObject();
+        response.put("success", true);
+        response.put("data", data);
+    
+        context.response().end(response.toString());
+    }
+    
+    private final static ExecutorService executor = Executors.newFixedThreadPool(32);
+    
+    public static void postClipboardUploadURLToken(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+    
+        Clipboard clipboard = user.getClipboard();
+        String token = context.request().getParam("token");
+        UploadURL uploadURL = UploadURL.findByToken(token);
+    
+        if(uploadURL == null){
+            Response.INVALID_UPLOAD_TOKEN.replyTo(context);
+            return;
+        }
+    
+        Clipboard.Clip clip = clipboard.newClip(uploadURL.getData());
+    
+        PipedInputStream inputStream = new PipedInputStream();
+        PipedOutputStream outputStream;
+    
+        try{
+            outputStream = new PipedOutputStream(inputStream);
+        }catch(IOException e){
+            Response.EXCEPTION_THROWN.replyToWithMessage(context, e.getMessage());
+            return;
+        }
+    
+        context.request().handler(buffer -> {
+            try{
+                outputStream.write(buffer.getBytes());
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        });
+    
+        context.request().endHandler(aVoid -> {
+            try{
+                outputStream.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        });
+    
+        executor.execute(() -> {
+            clip.writeToStorage(inputStream);
+            uploadURL.delete();
+            context.response().end(new JSONObject().put("success", true).toString());
+        });
     }
     
 }
