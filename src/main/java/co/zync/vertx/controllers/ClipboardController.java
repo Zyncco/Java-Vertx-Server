@@ -340,6 +340,7 @@ public class ClipboardController {
         }
     
         Clipboard.Clip clip = clipboard.newClip(uploadURL.getData());
+        uploadURL.delete();
     
         PipedInputStream inputStream = new PipedInputStream();
         PipedOutputStream outputStream;
@@ -369,7 +370,6 @@ public class ClipboardController {
     
         executor.execute(() -> {
             clip.writeToStorage(inputStream);
-            uploadURL.delete();
             context.response().end(new JSONObject().put("success", true).toString());
         });
     }
