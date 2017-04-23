@@ -6,6 +6,8 @@ import co.zync.vertx.messages.ClipDataMessage;
 import co.zync.vertx.models.Clipboard;
 import co.zync.vertx.models.UploadURL;
 import co.zync.vertx.models.User;
+import com.google.cloud.datastore.FullEntity;
+import com.google.cloud.datastore.IncompleteKey;
 import io.vertx.ext.web.RoutingContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -324,13 +326,6 @@ public class ClipboardController {
     private final static ExecutorService executor = Executors.newFixedThreadPool(32);
     
     public static void postClipboardUploadURLToken(RoutingContext context){
-        User user = User.fromRequestContext(context);
-        if(user == null){
-            Response.INVALID_ZYNC_TOKEN.replyTo(context);
-            return;
-        }
-    
-        Clipboard clipboard = user.getClipboard();
         String token = context.request().getParam("token");
         UploadURL uploadURL = UploadURL.findByToken(token);
     
@@ -339,9 +334,18 @@ public class ClipboardController {
             return;
         }
     
-        Clipboard.Clip clip = clipboard.newClip(uploadURL.getData());
+        FullEntity<IncompleteKey> data = uploadURL.getData();
         uploadURL.delete();
     
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+    
+        Clipboard clipboard = user.getClipboard();
+        Clipboard.Clip clip = clipboard.newClip(data);
+        
         PipedInputStream inputStream = new PipedInputStream();
         PipedOutputStream outputStream;
     
