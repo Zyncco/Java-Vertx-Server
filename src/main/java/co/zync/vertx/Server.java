@@ -50,12 +50,20 @@ public class Server {
                     long start = System.currentTimeMillis();
                     
                     context.response().endHandler(aVoid -> {
+                        String host = context.request().remoteAddress().host();
+                        
+                        if(context.request().getHeader("X-Forwarded-Host") != null){
+                            host = context.request().getHeader("X-Forwarded-Host");
+                        }else if(context.request().getHeader("X-Real-IP") != null){
+                            host = context.request().getHeader("X-Real-IP");
+                        }
+                        
                         System.out.printf("[%s][%s][%s][%s][%s] %s\n",
                                 System.currentTimeMillis() / 1000,
                                 (System.currentTimeMillis() - start) + "ms",
                                 context.request().method().name(),
                                 context.response().getStatusCode(),
-                                context.request().connection().remoteAddress().host(),
+                                host,
                                 context.request().uri().split("\\?")[0]);
                     });
                     
