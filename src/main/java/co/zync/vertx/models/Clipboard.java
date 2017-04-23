@@ -248,7 +248,10 @@ public class Clipboard extends Base {
         }
     
         public void deleteFromStorage(){
-            StorageManager.getInstance().getBucket().get(getHexPath()).delete();
+            try{
+                StorageManager.getInstance().getBucket().get(getHexPath()).delete();
+            }catch(Exception ignored){
+            }
         }
     
         public String getPayload(){
