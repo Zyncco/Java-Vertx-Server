@@ -20,7 +20,7 @@ import java.util.logging.Logger;
 
 public class Server {
     
-    private final static int LISTENING_PORT = 8080;
+    private final static int LISTENING_PORT = 56473;
     
     public static void main(String[] args) throws IOException{
         Logger.getLogger("com.google.datastore.v1.client.RemoteRpc").setLevel(Level.ALL);
