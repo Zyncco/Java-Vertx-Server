@@ -109,15 +109,20 @@ public class Clipboard extends Base {
     }
     
     public Clip newClip(FullEntity<IncompleteKey> entity){
+        Clip ignored = null;
+        
         if(clips.size() + 1 > 10){
-            Clip oldestClip = clips.get(clips.keySet().stream().sorted().findFirst().get());
-            oldestClip.deleteFromStorage();
-            this.entity.getList("clips").remove(oldestClip.entity);
+            ignored = clips.get(clips.keySet().stream().sorted().findFirst().get());
+            ignored.deleteFromStorage();
         }
         
-        ListValue clips = ListValue.of(this.entity.getList("clips")).toBuilder().addValue(entity).build();
+        Clip finalIgnored = ignored;
+        ListValue.Builder builder = ListValue.newBuilder();
+        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || clip.equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
         
-        edit().set("clips", clips).set("latest", entity.getLong("timestamp")).set("clip_count", getClipCount() + 1);
+        builder.addValue(entity);
+        
+        edit().set("clips", builder.build()).set("latest", entity.getLong("timestamp")).set("clip_count", getClipCount() + 1);
     
         save();
         
@@ -131,11 +136,16 @@ public class Clipboard extends Base {
     }
     
     public Clip newClip(String payloadType, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
+        Clip ignored = null;
+    
         if(clips.size() + 1 > 10){
-            Clip oldestClip = clips.get(clips.keySet().stream().sorted().findFirst().get());
-            oldestClip.deleteFromStorage();
-            entity.getList("clips").remove(oldestClip.entity);
+            ignored = clips.get(clips.keySet().stream().sorted().findFirst().get());
+            ignored.deleteFromStorage();
         }
+    
+        Clip finalIgnored = ignored;
+        ListValue.Builder builder = ListValue.newBuilder();
+        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || clip.equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
         
         FullEntity.Builder<IncompleteKey> hashEntity = FullEntity.newBuilder();
         hash.forEach((key, value) -> hashEntity.set(key, (String) value));
@@ -150,9 +160,9 @@ public class Clipboard extends Base {
                 .set("encryption", encryptionEntity.build())
                 .build();
         
-        ListValue clips = ListValue.of(entity.getList("clips")).toBuilder().addValue(clipEntity).build();
-    
-        edit().set("clips", clips).set("latest", timestamp).set("clip_count", getClipCount() + 1);
+        builder.addValue(clipEntity);
+        
+        edit().set("clips", builder.build()).set("latest", timestamp).set("clip_count", getClipCount() + 1);
         
         save();
         
