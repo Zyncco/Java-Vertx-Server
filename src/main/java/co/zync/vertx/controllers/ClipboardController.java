@@ -8,6 +8,7 @@ import co.zync.vertx.models.UploadURL;
 import co.zync.vertx.models.User;
 import com.google.cloud.datastore.FullEntity;
 import com.google.cloud.datastore.IncompleteKey;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.RoutingContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -71,8 +72,9 @@ public class ClipboardController {
             Response.CLIPBOARD_NOT_FOUND.replyTo(context);
             return;
         }
-        
-        context.response().end(clip.getPayload());
+    
+        context.response().setChunked(true);
+        context.response().end(Buffer.buffer(clip.getPayload()));
     }
     
     public static void getClipboardTimestamp(RoutingContext context){
@@ -159,8 +161,9 @@ public class ClipboardController {
                     Response.CLIPBOARD_NOT_FOUND.replyTo(context);
                     return;
                 }
-                
-                context.response().end(clip.getPayload());
+    
+                context.response().setChunked(true);
+                context.response().end(Buffer.buffer(clip.getPayload()));
             }catch(Exception ignored){
                 Response.CLIPBOARD_NOT_FOUND.replyTo(context);
             }

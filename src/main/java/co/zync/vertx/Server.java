@@ -113,12 +113,12 @@ public class Server {
         router.post("/clipboard/").handler(ClipboardController::postClipboard);
         router.delete("/clipboard/").handler(ClipboardController::deleteClipboard);
         router.get("/clipboard/history/").handler(ClipboardController::getClipboardHistory);
-        router.get("/clipboard/raw/").produces("text/plain").handler(ClipboardController::getClipboardRaw);
+        router.get("/clipboard/raw/").handler(ClipboardController::getClipboardRaw);
     
         router.post("/clipboard/upload/").handler(ClipboardController::postClipboardUploadURL);
         router.post("/clipboard/upload/:token").handler(ClipboardController::postClipboardUploadURLToken);
     
-        router.get("/clipboard/:timestamp/raw").produces("text/plain").handler(ClipboardController::getClipboardTimestampRaw);
+        router.get("/clipboard/:timestamp/raw").handler(ClipboardController::getClipboardTimestampRaw);
         router.get("/clipboard/:timestamp").handler(ClipboardController::getClipboardTimestamp);
         
         router.post("/user/authenticate/").handler(UserController::postAuthenticate);

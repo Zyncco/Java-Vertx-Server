@@ -264,8 +264,8 @@ public class Clipboard extends Base {
             }
         }
     
-        public String getPayload(){
-            return new String(StorageManager.getInstance().getBucket().get(getHexPath()).getContent());
+        public byte[] getPayload(){
+            return StorageManager.getInstance().getBucket().get(getHexPath()).getContent();
         }
         
     }
