@@ -22,7 +22,7 @@ public class StorageManager {
                 .build()
                 .getService();
         
-        this.bucket = this.storage.get("zync-clipboard-storage-1");
+        this.bucket = this.storage.get(CredentialsManager.getInstance().getBucketName());
     }
     
     public Storage getStorage(){

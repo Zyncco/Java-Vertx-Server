@@ -21,6 +21,7 @@ public class CredentialsManager {
     private final FirebaseCredential firebaseCredentials;
     private final String firebaseCloudMessagingKey;
     private final String projectId;
+    private final String bucketName;
     
     private CredentialsManager(){
         try{
@@ -28,6 +29,7 @@ public class CredentialsManager {
             this.firebaseCredentials = FirebaseCredentials.fromCertificate(new FileInputStream("credentials/firebase-credentials.json"));
             this.firebaseCloudMessagingKey = new String(Files.readAllBytes(Paths.get("credentials/firebase-cloud-messaging-key.txt"))).trim();
             this.projectId = new String(Files.readAllBytes(Paths.get("credentials/project-id.txt"))).trim();
+            this.bucketName = new String(Files.readAllBytes(Paths.get("credentials/bucket-name.txt"))).trim();
         }catch(IOException e){
             throw new RuntimeException(e);
         }
@@ -47,6 +49,10 @@ public class CredentialsManager {
 
     public String getProjectId(){
         return projectId;
+    }
+
+    public String getBucketName(){
+        return bucketName;
     }
 
 }
