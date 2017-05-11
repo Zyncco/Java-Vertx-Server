@@ -105,7 +105,7 @@ public class Server {
         System.out.println();
     }
     
-    public static void createV0Routes(Router router){
+    private static void createV0Routes(Router router){
         router.get("/ping/").handler(PingController::ping);
         router.head("/ping/").handler(PingController::ping);
         

@@ -17,7 +17,7 @@ public class StorageManager {
     
     private StorageManager(){
         this.storage = StorageOptions.newBuilder()
-                .setProjectId("zync-b3bce")
+                .setProjectId(CredentialsManager.getInstance().getProjectId())
                 .setCredentials(CredentialsManager.getInstance().getGoogleCredentials())
                 .build()
                 .getService();

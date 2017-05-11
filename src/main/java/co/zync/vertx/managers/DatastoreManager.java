@@ -15,7 +15,7 @@ public class DatastoreManager {
     
     private DatastoreManager(){
         this.datastore = DatastoreOptions.newBuilder()
-                .setProjectId("zync-b3bce")
+                .setProjectId(CredentialsManager.getInstance().getProjectId())
                 .setCredentials(CredentialsManager.getInstance().getGoogleCredentials())
                 .build()
                 .getService();

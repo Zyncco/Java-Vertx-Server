@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 public class CredentialsManager {
     
     private static CredentialsManager ourInstance = new CredentialsManager();
-    
+
     public static CredentialsManager getInstance(){
         return ourInstance;
     }
@@ -20,12 +20,14 @@ public class CredentialsManager {
     private final GoogleCredentials googleCredentials;
     private final FirebaseCredential firebaseCredentials;
     private final String firebaseCloudMessagingKey;
+    private final String projectId;
     
     private CredentialsManager(){
         try{
             this.googleCredentials = GoogleCredentials.fromStream(new FileInputStream("credentials/appengine-credentials.json"));
             this.firebaseCredentials = FirebaseCredentials.fromCertificate(new FileInputStream("credentials/firebase-credentials.json"));
             this.firebaseCloudMessagingKey = new String(Files.readAllBytes(Paths.get("credentials/firebase-cloud-messaging-key.txt"))).trim();
+            this.projectId = new String(Files.readAllBytes(Paths.get("credentials/project-id.txt"))).trim();
         }catch(IOException e){
             throw new RuntimeException(e);
         }
@@ -42,5 +44,9 @@ public class CredentialsManager {
     public String getFirebaseCloudMessagingKey(){
         return firebaseCloudMessagingKey;
     }
-    
+
+    public String getProjectId(){
+        return projectId;
+    }
+
 }

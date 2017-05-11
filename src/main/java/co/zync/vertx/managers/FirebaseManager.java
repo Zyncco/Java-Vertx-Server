@@ -18,7 +18,7 @@ public class FirebaseManager {
     private FirebaseManager(){
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredential(CredentialsManager.getInstance().getFirebaseCredentials())
-                .setDatabaseUrl("https://zync-b3bce.firebaseio.com/")
+                .setDatabaseUrl("https://" + CredentialsManager.getInstance().getProjectId() + ".firebaseio.com/")
                 .build();
 
         this.firebaseApp = FirebaseApp.initializeApp(options);
