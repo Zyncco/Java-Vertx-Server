@@ -64,5 +64,54 @@ public class UserController {
             device.send(new RandomTokenDataMessage(device.getRandomToken(), user.getZyncToken()));
         });
     }
-    
+
+    public static void getValidate(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+
+        Response.GENERIC_SUCCESS.replyTo(context);
+    }
+
+    public static void getLimits(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+
+        JSONObject clipboard = new JSONObject();
+        clipboard.put("size-limit", user.getClipboard().getSizeLimit());
+        clipboard.put("count-limit", user.getClipboard().getHistoryCountLimit());
+
+        JSONObject responseData = new JSONObject();
+        responseData.put("clipboard", clipboard);
+
+        JSONObject response = new JSONObject();
+        response.put("success", true);
+        response.put("data", responseData);
+
+        context.response().end(response.toString());
+    }
+
+    public static void getInfo(RoutingContext context){
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+
+        JSONObject responseData = new JSONObject();
+        responseData.put("register-date", user.getRegisterDate());
+        responseData.put("clip-count", user.getClipboard().getClipCount());
+
+        JSONObject response = new JSONObject();
+        response.put("success", true);
+        response.put("data", responseData);
+
+        context.response().end(response.toString());
+    }
+
 }

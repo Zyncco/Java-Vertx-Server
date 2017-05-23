@@ -4,7 +4,9 @@ import io.vertx.ext.web.RoutingContext;
 import org.json.JSONObject;
 
 public enum Response {
-    
+
+    GENERIC_SUCCESS(true, 200, 0, null),
+
     /*
      * 000 Block related to system
      */
@@ -62,12 +64,13 @@ public enum Response {
     public void replyToWithMessage(RoutingContext context, String message){
         JSONObject json = new JSONObject();
         json.put("success", success);
-    
-        JSONObject error = new JSONObject();
-        error.put("code", code);
-        error.put("message", message);
-    
-        json.put("error", error);
+
+        if(!success){
+            JSONObject error = new JSONObject();
+            error.put("code", code);
+            error.put("message", message);
+            json.put("error", error);
+        }
     
         context.response().setStatusCode(status);
         context.response().end(json.toString());

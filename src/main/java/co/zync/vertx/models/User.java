@@ -49,9 +49,13 @@ public class User extends Base {
     public String getGoogleToken(){
         return entity.getString("google_token");
     }
-    
+
     public String getZyncToken(){
         return entity.getString("zync_token");
+    }
+
+    public long getRegisterDate(){
+        return entity.getLong("register_date");
     }
     
     public Clipboard getClipboard(){
@@ -74,6 +78,7 @@ public class User extends Base {
                 .set("email", email)
                 .set("google_token", googleToken)
                 .set("zync_token", zyncToken)
+                .set("register_date", System.currentTimeMillis() / 1000)
                 .build();
     
         return new User(DatastoreManager.getInstance().getDatastore().put(entity));

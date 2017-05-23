@@ -120,9 +120,12 @@ public class Server {
     
         router.get("/clipboard/:timestamp/raw").handler(ClipboardController::getClipboardTimestampRaw);
         router.get("/clipboard/:timestamp").handler(ClipboardController::getClipboardTimestamp);
-        
+
         router.post("/user/authenticate/").handler(UserController::postAuthenticate);
-        
+        router.post("/user/validate/").handler(UserController::getValidate);
+        router.post("/user/limits/").handler(UserController::getLimits);
+        router.post("/user/info/").handler(UserController::getInfo);
+
         router.post("/device/validate/").handler(DeviceController::postValidate);
     }
     

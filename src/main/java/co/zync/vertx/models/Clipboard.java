@@ -48,6 +48,8 @@ public class Clipboard extends Base {
                 .set("clips", Collections.emptyList())
                 .set("latest", (long) -1)
                 .set("user", userKey)
+                .set("clip_size_limit", 10000000L)
+                .set("history_count_limit", 10)
                 .build();
     
         return new Clipboard(DatastoreManager.getInstance().getDatastore().put(entity));
@@ -62,9 +64,17 @@ public class Clipboard extends Base {
     
         return new Clipboard(result);
     }
-    
+
     public long getClipCount(){
         return entity.getLong("clip_count");
+    }
+
+    public long getSizeLimit(){
+        return entity.getLong("clip_size_limit");
+    }
+
+    public long getHistoryCountLimit(){
+        return entity.getLong("history_count_limit");
     }
     
     public long getLatest(){
