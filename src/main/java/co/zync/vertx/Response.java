@@ -29,7 +29,6 @@ public enum Response {
     CLIPBOARD_EMPTY(false, 200, 300, "Clipboard Empty"),
     CLIPBOARD_OUTDATED(false, 400, 301, "Clipboard Outdated"),
     CLIPBOARD_LATE(false, 400, 302, "Clipboard Late"),
-    CLIPBOARD_IDENTICAL(false, 400, 303, "Clipboard Identical"),
     CLIPBOARD_TIME_TRAVEL(false, 400, 304, "Clipboard is time traveling"),
     CLIPBOARD_NOT_FOUND(false, 404, 305, "Clipboard not found"),
     CLIPBOARDS_NOT_FOUND(false, 404, 306, "One or more of requested clipboards not found"),

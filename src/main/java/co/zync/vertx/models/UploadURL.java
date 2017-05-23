@@ -45,11 +45,8 @@ public class UploadURL extends Base {
                 '}';
     }
     
-    public static UploadURL create(String token, String payloadType, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
+    public static UploadURL create(String token, String payloadType, long timestamp, Map<String, Object> encryption){
         Key key = DatastoreManager.getInstance().getDatastore().allocateId(DatastoreManager.getInstance().getDatastore().newKeyFactory().setKind("upload_url_java").newKey());
-    
-        FullEntity.Builder<IncompleteKey> hashEntity = FullEntity.newBuilder();
-        hash.forEach((k, value) -> hashEntity.set(k, (String) value));
     
         FullEntity.Builder<IncompleteKey> encryptionEntity = FullEntity.newBuilder();
         encryption.forEach((k, value) -> encryptionEntity.set(k, (String) value));
@@ -57,7 +54,6 @@ public class UploadURL extends Base {
         FullEntity<IncompleteKey> clipEntity = FullEntity.newBuilder()
                 .set("payload-type", payloadType)
                 .set("timestamp", timestamp)
-                .set("hash", hashEntity.build())
                 .set("encryption", encryptionEntity.build())
                 .build();
     

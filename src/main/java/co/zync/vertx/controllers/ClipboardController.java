@@ -16,7 +16,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -216,20 +215,14 @@ public class ClipboardController {
     
         Clipboard clipboard = user.getClipboard();
     
-        Map<String, Object> hash = data.getJSONObject("hash").toMap();
         if(clipboard.getClips().size() > 0){
             if(timestamp < clipboard.getLatest()){
                 Response.CLIPBOARD_OUTDATED.replyTo(context);
                 return;
             }
-            
-            if(clipboard.clipExists(hash)){
-                Response.CLIPBOARD_IDENTICAL.replyTo(context);
-                return;
-            }
         }
     
-        Clipboard.Clip clip = clipboard.newClip(data.getString("payload-type"), payload, timestamp, hash, data.getJSONObject("encryption").toMap());
+        Clipboard.Clip clip = clipboard.newClip(data.getString("payload-type"), payload, timestamp, data.getJSONObject("encryption").toMap());
     
         JSONObject response = new JSONObject();
         response.put("success", true);
@@ -299,22 +292,16 @@ public class ClipboardController {
     
         Clipboard clipboard = user.getClipboard();
     
-        Map<String, Object> hash = data.getJSONObject("hash").toMap();
         if(clipboard.getClips().size() > 0){
             if(timestamp < clipboard.getLatest()){
                 Response.CLIPBOARD_OUTDATED.replyTo(context);
-                return;
-            }
-        
-            if(clipboard.clipExists(hash)){
-                Response.CLIPBOARD_IDENTICAL.replyTo(context);
                 return;
             }
         }
     
         String token = Utils.secureRandom(32);
     
-        UploadURL.create(token, data.getString("payload-type"), timestamp, hash, data.getJSONObject("encryption").toMap());
+        UploadURL.create(token, data.getString("payload-type"), timestamp, data.getJSONObject("encryption").toMap());
     
         data = new JSONObject();
         data.put("token", token);

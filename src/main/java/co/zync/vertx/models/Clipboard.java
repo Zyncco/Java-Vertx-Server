@@ -94,20 +94,6 @@ public class Clipboard extends Base {
                 '}';
     }
     
-    public boolean clipExists(Map<String, Object> hashes){
-        for(Clip clip : clips.values()){
-            for(Map.Entry<String, String> hash : clip.getHash().entrySet()){
-                if(hashes.containsKey(hash.getKey())){
-                    if(hashes.get(hash.getKey()).equals(hash.getValue())){
-                        return true;
-                    }
-                }
-            }
-        }
-        
-        return false;
-    }
-    
     public Clip newClip(FullEntity<IncompleteKey> entity){
         Clip ignored = null;
         
@@ -129,13 +115,13 @@ public class Clipboard extends Base {
         return this.clips.get(entity.getLong("timestamp"));
     }
     
-    public Clip newClip(String payloadType, String payload, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
-        Clip clip = newClip(payloadType, timestamp, hash, encryption);
+    public Clip newClip(String payloadType, String payload, long timestamp, Map<String, Object> encryption){
+        Clip clip = newClip(payloadType, timestamp, encryption);
         clip.writeToStorage(payload);
         return clip;
     }
     
-    public Clip newClip(String payloadType, long timestamp, Map<String, Object> hash, Map<String, Object> encryption){
+    public Clip newClip(String payloadType, long timestamp, Map<String, Object> encryption){
         Clip ignored = null;
     
         if(clips.size() + 1 > 10){
@@ -147,16 +133,12 @@ public class Clipboard extends Base {
         ListValue.Builder builder = ListValue.newBuilder();
         this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || clip.equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
         
-        FullEntity.Builder<IncompleteKey> hashEntity = FullEntity.newBuilder();
-        hash.forEach((key, value) -> hashEntity.set(key, (String) value));
-        
         FullEntity.Builder<IncompleteKey> encryptionEntity = FullEntity.newBuilder();
         encryption.forEach((key, value) -> encryptionEntity.set(key, (String) value));
         
         FullEntity<IncompleteKey> clipEntity = FullEntity.newBuilder()
                 .set("payload-type", payloadType)
                 .set("timestamp", timestamp)
-                .set("hash", hashEntity.build())
                 .set("encryption", encryptionEntity.build())
                 .build();
         
@@ -190,15 +172,6 @@ public class Clipboard extends Base {
             return (long) entity.getDouble("timestamp");
         }
         
-        public HashMap<String, String> getHash(){
-            HashMap<String, String> hash = new HashMap<>();
-    
-            FullEntity hashEntity = entity.getEntity("hash");
-            hashEntity.getNames().forEach(name -> hash.put((String) name, hashEntity.getString((String) name)));
-            
-            return hash;
-        }
-        
         public HashMap<String, String> getEncryption(){
             HashMap<String, String> encryption = new HashMap<>();
     
@@ -213,7 +186,6 @@ public class Clipboard extends Base {
             return "Clip{" +
                     "payloadType=" + getPayloadType() +
                     ", timestamp=" + getTimestamp() +
-                    ", hash=" + getHash() +
                     ", encryption=" + getEncryption() +
                     '}';
         }
@@ -235,7 +207,6 @@ public class Clipboard extends Base {
             JSONObject data = new JSONObject();
             data.put("timestamp", getTimestamp());
             data.put("payload-type", getPayloadType());
-            data.put("hash", getHash());
             data.put("encryption", getEncryption());
             
             if(payload){
