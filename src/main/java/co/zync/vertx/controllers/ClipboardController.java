@@ -233,7 +233,24 @@ public class ClipboardController {
     }
     
     public static void deleteClipboard(RoutingContext context){
-    
+        User user = User.fromRequestContext(context);
+        if(user == null){
+            Response.INVALID_ZYNC_TOKEN.replyTo(context);
+            return;
+        }
+
+        Clipboard clipboard = user.getClipboard();
+        if(clipboard.getClips().size() == 0){
+            Response.CLIPBOARD_EMPTY.replyTo(context);
+            return;
+        }
+
+        clipboard.delete();
+
+        JSONObject response = new JSONObject();
+        response.put("success", true);
+
+        context.response().end(response.toString());
     }
     
     public static void getClipboardHistory(RoutingContext context){
