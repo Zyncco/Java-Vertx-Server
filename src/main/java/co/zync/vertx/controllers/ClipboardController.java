@@ -261,11 +261,7 @@ public class ClipboardController {
         }
         
         Clipboard clipboard = user.getClipboard();
-        if(clipboard.getClips().size() == 0){
-            Response.CLIPBOARD_EMPTY.replyTo(context);
-            return;
-        }
-        
+
         JSONArray history = new JSONArray();
         clipboard.getClips().forEach((timestamp, clip) -> history.put(clip.toJson(false)));
         
