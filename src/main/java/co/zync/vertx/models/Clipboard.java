@@ -114,7 +114,7 @@ public class Clipboard extends Base {
         
         Clip finalIgnored = ignored;
         ListValue.Builder builder = ListValue.newBuilder();
-        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || clip.equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
+        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || !clip.get().equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
         
         builder.addValue(entity);
         
@@ -141,7 +141,7 @@ public class Clipboard extends Base {
     
         Clip finalIgnored = ignored;
         ListValue.Builder builder = ListValue.newBuilder();
-        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || !clip.equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
+        this.entity.getList("clips").stream().filter(clip -> finalIgnored == null || !clip.get().equals(finalIgnored.entity)).forEach(clip -> builder.addValue(clip));
         
         FullEntity.Builder<IncompleteKey> encryptionEntity = FullEntity.newBuilder();
         encryption.forEach((key, value) -> encryptionEntity.set(key, (String) value));
