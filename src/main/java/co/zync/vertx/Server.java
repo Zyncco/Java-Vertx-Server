@@ -47,7 +47,7 @@ public class Server {
         router.options("/*").handler(request -> {
             request.response().putHeader("Access-Control-Allow-Origin", "*");
             request.response().putHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            request.response().putHeader("Access-Control-Allow-Headers", "accept, authorization, content-type, email");
+            request.response().putHeader("Access-Control-Allow-Headers", "accept, authorization, content-type, email, x-zync-token");
             request.response().end();
         });
 
