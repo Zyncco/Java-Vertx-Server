@@ -98,11 +98,17 @@ public class Device extends Base {
         }
         
         if(response.getInt("failure") > 0){
-            String error = response.getJSONArray("results").getJSONObject(0).getString("error");
-            if(error.equalsIgnoreCase("NotRegistered")
-                    || error.equalsIgnoreCase("InvalidRegistration")
-                    || error.equalsIgnoreCase("MissingRegistration")){
-                delete();
+            JSONArray results = response.getJSONArray("results");
+            for(int i = 0; i < results.length(); i++){
+                JSONObject device = results.getJSONObject(i);
+                if(device.has("error")){
+                    String error = device.getString("error");
+                    if(error.equalsIgnoreCase("NotRegistered")
+                            || error.equalsIgnoreCase("InvalidRegistration")
+                            || error.equalsIgnoreCase("MissingRegistration")){
+                        delete();
+                    }
+                }
             }
         }
     }
@@ -134,11 +140,14 @@ public class Device extends Base {
             if(response.getInt("failure") > 0){
                 JSONArray results = response.getJSONArray("results");
                 for(int i = 0; i < results.length(); i++){
-                    String error = results.getJSONObject(i).getString("error");
-                    if(error.equalsIgnoreCase("NotRegistered")
-                            || error.equalsIgnoreCase("InvalidRegistration")
-                            || error.equalsIgnoreCase("MissingRegistration")){
-                        validatedDevices.get(i).delete();
+                    JSONObject device = results.getJSONObject(i);
+                    if(device.has("error")){
+                        String error = device.getString("error");
+                        if(error.equalsIgnoreCase("NotRegistered")
+                                || error.equalsIgnoreCase("InvalidRegistration")
+                                || error.equalsIgnoreCase("MissingRegistration")){
+                            validatedDevices.get(i).delete();
+                        }
                     }
                 }
             }
