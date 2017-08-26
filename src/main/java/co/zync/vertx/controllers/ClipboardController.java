@@ -378,6 +378,7 @@ public class ClipboardController {
         executor.execute(() -> {
             clip.writeToStorage(inputStream);
             context.response().end(new JSONObject().put("success", true).toString());
+            user.getDevices().send(new ClipDataMessage(clip));
         });
     }
     
